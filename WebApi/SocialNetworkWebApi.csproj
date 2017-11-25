@@ -93,6 +93,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="App_Start\Windsor\WebApiInstaller.cs" />
+    <Compile Include="App_Start\Windsor\WindsorCompositionRoot.cs" />
+    <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -109,13 +112,16 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Controllers\" />
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SocialNetworkBL\SocialNetworkBL.csproj">
       <Project>{504af2d8-ec1d-4507-8586-8e41b91bfdf0}</Project>
       <Name>SocialNetworkBL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SocialNetwork\SocialNetworkDAL.csproj">
+      <Project>{24F55BEF-33ED-4EFC-838B-666B21B0F53B}</Project>
+      <Name>SocialNetworkDAL</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
