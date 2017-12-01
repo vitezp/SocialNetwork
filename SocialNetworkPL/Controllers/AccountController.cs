@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -29,7 +27,7 @@ namespace SocialNetworkPL.Controllers
 
                 var authTicket = new FormsAuthenticationTicket(1, userCreateDto.NickName, DateTime.Now,
                     DateTime.Now.AddMinutes(30), false, "");
-                string encryptedTicket = FormsAuthentication.Encrypt(authTicket);
+                var encryptedTicket = FormsAuthentication.Encrypt(authTicket);
                 var authCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket);
                 HttpContext.Response.Cookies.Add(authCookie);
 
@@ -50,27 +48,29 @@ namespace SocialNetworkPL.Controllers
         [HttpPost]
         public async Task<ActionResult> Login(LoginModel model, string returnUrl)
         {
-            bool success = await UserFacade.Login(model.NickName, model.Password);
+            if (string.IsNullOrWhiteSpace(model.NickName) || string.IsNullOrWhiteSpace(model.Password))
+            {
+                ModelState.AddModelError("", "Wrong username or password!");
+                return View();
+            }
+
+            var success = await UserFacade.Login(model.NickName, model.Password);
             if (success)
             {
                 //FormsAuthentication.SetAuthCookie(model.Username, false);
 
                 var authTicket = new FormsAuthenticationTicket(1, model.NickName, DateTime.Now,
                     DateTime.Now.AddMinutes(30), false, "");
-                string encryptedTicket = FormsAuthentication.Encrypt(authTicket);
+                var encryptedTicket = FormsAuthentication.Encrypt(authTicket);
                 var authCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket);
                 HttpContext.Response.Cookies.Add(authCookie);
 
                 var decodedUrl = "";
                 if (!string.IsNullOrEmpty(returnUrl))
-                {
                     decodedUrl = Server.UrlDecode(returnUrl);
-                }
 
                 if (Url.IsLocalUrl(decodedUrl))
-                {
                     return Redirect(decodedUrl);
-                }
                 return RedirectToAction("Index", "Home");
             }
             ModelState.AddModelError("", "Wrong username or password!");
