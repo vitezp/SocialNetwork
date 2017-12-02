@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Mvc;
@@ -21,28 +22,30 @@ namespace SocialNetworkPL.Controllers
         public async Task<ActionResult> Index([FromUri] string subname)
         {
             var filter = new UserFilterDto {SubName = subname};
-
+            
             var users = await UserFacade.GetUsersContainingSubNameAsync(filter.SubName);
-            var model = InitializeProductListViewModel(filter, users);
+            var user = await UserFacade.GetUserByNickNameAsync(User.Identity.Name);
 
-            return View("FindUsersView", model);
+            var model = InitializeProductListViewModel(filter, users, user);
+
+            return View("FriendManagementView", model);
         }
 
-        private FindUsersModel InitializeProductListViewModel(UserFilterDto filter, IEnumerable<UserDto> users)
+        private FindUsersModel InitializeProductListViewModel(UserFilterDto filter, IEnumerable<UserDto> users, UserDto user)
         {
             return new FindUsersModel
             {
                 Filter = filter,
-                Users = new HashSet<UserDto>(users)
+                Users = new HashSet<UserDto>(users),
+                User = user
             };
         }
 
-        // GET: Users/UserProfile/5
         public async Task<ActionResult> UserProfile(string nickName = "")
         {
             UserDto user;
             List<PostDto> posts;
-            List<UserDto> friendships;
+            List<int> friendships;
 
             if (nickName != "")
             {
@@ -50,7 +53,7 @@ namespace SocialNetworkPL.Controllers
                 {
                     user = await UserFacade.GetUserByNickNameAsync(nickName);
                     posts = await PostFacade.GetPostsByUserIdAsync(user.Id) as List<PostDto>;
-                    friendships = await FriendshipFacade.GetFriendsByUserIdAsync(user.Id) as List<UserDto>;
+                    friendships = await FriendshipFacade.GetFriendsIdsByUserIdAsync(user.Id) as List<int>;
                 }
                 catch
                 {
@@ -66,7 +69,7 @@ namespace SocialNetworkPL.Controllers
             {
                 UserDto = user,
                 PostDtos = posts,
-                FriendshipDtos = friendships
+                FriendsIds = friendships
             });
         }
 
@@ -150,7 +153,7 @@ namespace SocialNetworkPL.Controllers
                 {
                     Text = model.NewPostText,
                     UserId = model.UserDto.Id,
-                    PostedAt = DateTime.Now
+                    PostedAt = DateTime.Now.ToUniversalTime()
                 };
 
                 await PostFacade.CreateAsync(newPost);
@@ -160,6 +163,40 @@ namespace SocialNetworkPL.Controllers
             {
                 return RedirectToAction("UserProfile", new { nickName = model.UserDto.NickName });
             }
+        }
+
+
+        [System.Web.Mvc.HttpPost]
+        public async Task<ActionResult> AddFriend(int id)
+        {
+            var user = await UserFacade.GetUserByNickNameAsync(User.Identity.Name);
+
+            var friendship = new FriendshipDto()
+            {
+                User1Id = user.Id,
+                User2Id = id,
+                FriendshipStart = DateTime.Now.ToUniversalTime(),
+            };
+
+            await FriendshipFacade.CreateAsync(friendship);
+            return RedirectToAction("Index");
+        }
+
+        [System.Web.Mvc.HttpPost]
+        public async Task<ActionResult> AcceptFriend(int friendId)
+        {
+            var user = await UserFacade.GetUserByNickNameAsync(User.Identity.Name);
+            var friendship = user.AcceptedFriendships
+                .FirstOrDefault(x => !x.IsAccepted && x.User1Id == friendId);
+
+            if (friendship != null)
+            {
+                friendship.IsAccepted = true;
+
+                await FriendshipFacade.UpdateAsync(friendship);
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }
