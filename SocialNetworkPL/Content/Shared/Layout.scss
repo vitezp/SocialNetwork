@@ -27,6 +27,118 @@
 input, button {
     border-radius: 0 !important;
 }
+//sidebar
+.sidebar {
+    padding: 0 !important;
+    border: 1px lightgray solid;
+
+    h4 {
+        padding: 15px 10px 5px;
+    }
+
+    @mixin sponsor-img() {
+        height: 250px;
+        margin-bottom: 15px;
+        background-size: cover;
+    }
+
+    .sea {
+        @include sponsor-img();
+        background: url("../../Assets/img/sea-400.jpg") no-repeat center;
+        height: 200px;
+    }
+
+    .city {
+        @include sponsor-img();
+        background: url("../../Assets/img/city-400.jpg") no-repeat center;
+    }
+
+    .road {
+        @include sponsor-img();
+        background: url("../../Assets/img/road-400.jpg") no-repeat center;
+    }
+}
+
+//posts
+.post-container {
+    margin-bottom: 25px;
+    border: 1px lightgray solid;
+
+    .posts {
+        padding: 15px 30px 15px 10px !important;
+
+        .post {
+            display: flex;
+            padding-bottom: 15px;
+
+            &:not(:last-child) {
+                border-bottom: 1px lightgray solid;
+                margin-bottom: 25px;
+                padding-bottom: 40px;
+            }
+
+            .profile-picture {
+                position: relative;
+                top: 9px;
+                height: 50px;
+                min-width: 50px;
+            }
+
+            .content {
+                width: 100%;
+                padding-left: 15px;
+
+                & > div {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: baseline;
+                }
+
+                .message {
+                }
+
+                .images {
+                }
+            }
+        }
+    }
+}
+
+//send comment
+
+.send-comment {
+
+    form {
+        width: 100%;
+    }
+}
+
+
+//comments
+
+.comments {
+    padding-left: 0 !important;
+    padding-top: 15px !important;
+
+    .comment {
+        display: flex;
+        border-top: 1px solid lightgrey;
+        padding: 15px 0;
+    }
+}
+
+
+//search button
+
+.search-btn {
+    display: flex;
+    justify-content: space-between;
+
+    .form-control {
+        border-right: none;
+    }
+}
+
 
 //profile picture
 
