@@ -23,11 +23,13 @@ namespace SocialNetworkBL.Config
 
             config.CreateMap<Post, UserProfilePostDto>()
                 .ForMember(x => x.Comments, opt => opt.Ignore())
-                ;
+                .ForMember(x => x.NickName, opt => opt.Ignore());
             config.CreateMap<UserProfilePostDto, Post>();
             config.CreateMap<QueryResult<Post>, QueryResultDto<UserProfilePostDto, PostFilterDto>>();
 
-            config.CreateMap<User, BasicUserDto>().ReverseMap();
+            config.CreateMap<User, BasicUserDto>()
+                .ForMember(x => x.Friends, opt => opt.Ignore())
+                .ReverseMap();
             config.CreateMap<QueryResult<User>, QueryResultDto<BasicUserDto, UserFilterDto>>();
 
 

@@ -23,7 +23,7 @@
                 <ul class="nav navbar-nav">
                     @if (Request.IsAuthenticated)
                     {
-                        <li>@Html.ActionLink("Friend management", "Index", "Users")</li>
+                        <li>@Html.ActionLink("Friend management", "Index", "UsersManager")</li>
                     }
 
                 </ul>
@@ -31,10 +31,10 @@
                     @if (Request.IsAuthenticated)
                     {
                         <li >
-                            @Html.ActionLink(User.Identity.Name, "UserProfile", "Users", new { nickName = User.Identity.Name },null)
+                            @Html.ActionLink(User.Identity.Name, "Index", "UserProfile", new { nickName = User.Identity.Name },null)
                         </li>
                         <li>
-                            @Html.ActionLink("Settings", "UserSettings", "Users", new { nickName = User.Identity.Name }, null)
+                            @Html.ActionLink("Settings", "UserSettings", "UserProfile", new { nickName = User.Identity.Name }, null)
                         </li>
                         <li class="dropdown pull-right">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
