@@ -42,74 +42,47 @@ namespace SocialNetworkBL.Facades
             }
         }
 
-        public async Task<int> CreateGroup(GroupCreateDto groupDto, AddUserToGroupDto userToGroup)
+        public async Task<int> CreateGroup(GroupCreateDto groupDto, int userId)
         {
-            using (UnitOfWorkProvider.Create())
+            using (var uow = UnitOfWorkProvider.Create())
             {
                 var groupId = await _groupService.CreateGroupAsync(groupDto);
+
+                var userToGroup = new AddUserToGroupDto()
+                {
+                    GroupId = groupId,
+                    UserId = userId,
+                    IsAccepted = true
+                };
+
                 userToGroup.GroupId = groupId;
                 await _groupUserService.AddUserToGroupAsync(userToGroup, true);
+                await uow.Commit();
+                return groupId;
+            }
+        }
+        
+        public async Task<int> AddUserAsync(AddUserToGroupDto userToGroup)
+        {
+            using (var uow = UnitOfWorkProvider.Create())
+            {
+                var groupId = await _groupUserService.AddUserToGroupAsync(userToGroup, false);
+                await uow.Commit();
                 return groupId;
             }
         }
 
-        public async Task<IList<UserDto>> GetUsersByGroupIdAsync(int groupId)
+        public async Task AcceptInvitation(int userId, int groupId)
         {
-            using (UnitOfWorkProvider.Create())
-            {
-                return await _getGroupUsersService.GetUsersByGroupIdAsync(groupId);
-            }
-        }
-        
-
-        public async Task<int> AddUserAsync(AddUserToGroupDto userToGroup)
-        {
-            using (UnitOfWorkProvider.Create())
-            {
-                return await _groupUserService.AddUserToGroupAsync(userToGroup, false);
-            }
-        }
-
-
-        public async Task<IList<PostDto>> GetGroupPostsAsync(int groupId)
-        {
-            using (UnitOfWorkProvider.Create())
-            {
-                return await _postService.GetPostsByGroupIdAsync(groupId);
-            }
-        }
-
-        public int PostInGroup(PostDto post, int groupId)
-        {
-            post.GroupId = groupId;
-            using (UnitOfWorkProvider.Create())
-            {
-                return _postService.Create(post);
-            }
-        }
-
-        #region AdminMethods
-
-        public async void RemoveUserFromGroup(int groupId, int userId)
-        {
-            using (UnitOfWorkProvider.Create())
+            using (var uow = UnitOfWorkProvider.Create())
             {
                 var groupUser = await _groupUserService.GetGroupUserAsync(groupId, userId);
-                _groupUserService.Delete(groupUser.Id);
-            }
-        }
+                groupUser.IsAccepted = true;
 
-        public async Task MakeUserAdminAsync(int groupId, int userId)
-        {
-            using (UnitOfWorkProvider.Create())
-            {
-                var groupUser = await _groupUserService.GetGroupUserAsync(groupId, userId);
-                groupUser.IsAdmin = true;
                 await _groupUserService.Update(groupUser);
+
+                await uow.Commit();
             }
         }
-
-        #endregion
-
     }
 }

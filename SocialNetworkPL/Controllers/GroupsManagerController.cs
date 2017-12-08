@@ -1,14 +1,11 @@
-﻿using SocialNetworkBL.DataTransferObjects;
+﻿
+using System.Threading.Tasks;
+using System.Web.Http;
+using System.Web.Mvc;
+using SocialNetworkBL.DataTransferObjects;
 using SocialNetworkBL.DataTransferObjects.Filters;
 using SocialNetworkBL.Facades;
 using SocialNetworkPL.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Http;
-using System.Web.Mvc;
 
 namespace SocialNetworkPL.Controllers
 {
@@ -38,16 +35,36 @@ namespace SocialNetworkPL.Controllers
         [System.Web.Mvc.HttpPost]
         public async Task<ActionResult> BecomeMember(int groupId)
         {
-            var user = await BasicUserFacade.GetUserByNickNameAsync(User.Identity.Name);
+            var authUser = await BasicUserFacade.GetUserByNickNameAsync(User.Identity.Name);
 
             var addUserToGroupDto = new AddUserToGroupDto
             {
-                UserId = user.Id,
+                UserId = authUser.Id,
                 GroupId = groupId,
                 IsAccepted = true
             };
 
             await GroupGenericFacade.AddUserAsync(addUserToGroupDto);
+            return RedirectToAction("Index");
+        }
+
+        public ActionResult CreateGroup()
+        {
+
+            return View("CreateGroup", null);
+        }
+
+        [System.Web.Mvc.HttpPost]
+        public async Task<ActionResult> CreateGroup(GroupCreateDto group)
+        {
+            var authUser = await BasicUserFacade.GetUserByNickNameAsync(User.Identity.Name);
+            var group_Id = await GroupGenericFacade.CreateGroup(group, authUser.Id);
+            return RedirectToAction("Index", "GroupsManager", new { groupId = group_Id });
+        }
+
+        public async Task<ActionResult> AcceptInvitation(int groupId, int userId)
+        {
+            await GroupGenericFacade.AcceptInvitation(userId, groupId);
             return RedirectToAction("Index");
         }
     }

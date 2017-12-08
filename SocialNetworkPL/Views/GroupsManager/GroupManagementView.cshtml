@@ -4,6 +4,10 @@
 @if (User.Identity.IsAuthenticated)
 {
     <div class="GroupManagement col-md-7">
+        @Html.ActionLink("Create Group", "CreateGroup", "GroupsManager", FormMethod.Get, null)
+    </div>
+    
+    <div class="GroupManagement col-md-7">
         @using (Html.BeginForm("Index", "GroupsManager", FormMethod.Get, new { @class = "form-search" }))
         {
             <div class="form-group">
@@ -28,13 +32,13 @@
                         <th scope="row">
                             @{ var pathToImg = "";}
                             <div class="profile-picture" style="background-image: url(@pathToImg)"></div>
-                            @Html.ActionLink(group.Name, "Index", "GroupProfile", new { name = group.Name }, null)
+                            @Html.ActionLink(group.Name, "Index", "GroupProfile", new { groupId = group.Id }, null)
                         </th>
 
                         <td>
                             @if (!Model.User.Groups.Where(groupUser => !groupUser.IsAccepted && groupUser.Group.Id == group.Id).IsNullOrEmpty())
                             {
-                                <input type="submit" value="Accept invitation" class="btn btn-default" />
+                                @Html.ActionLink("Accept invitation", "AcceptInvitation", new { groupId = group.Id, userId = Model.User.Id }, new { @class = "btn btn-default" })
                             }
                             else if (!Model.User.Groups.Where(groupUser => groupUser.IsAccepted && groupUser.IsAdmin == true && groupUser.Group.Id == group.Id).IsNullOrEmpty())
                             {
